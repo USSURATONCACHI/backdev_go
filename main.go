@@ -1,15 +1,8 @@
 package main
 
 import (
-	"backdev_go/jwt"
-	"encoding/base64"
-
-	// "crypto/sha512"
-	// "github.com/BurntSushi/toml"
 	"fmt"
 	"os"
-
-	
 )
 
 type AcessTokenPayload struct {
@@ -28,21 +21,5 @@ func main() {
 	}
 	fmt.Println("Secret is: ", config.Secret)
 
-	msg := "I am sigma!"
-	
-	fmt.Printf("Base string: %s\n", msg)
-	encoded := base64.StdEncoding.EncodeToString([]byte(msg))
-
-	fmt.Printf("Encoded: %s\n", encoded)
-
-	decoded, err := base64.StdEncoding.DecodeString(encoded)
-
-	if (err != nil) {
-		fmt.Printf("Decode failed: %s\n", err)
-		return
-	}
-
-	fmt.Printf("Decoded back: %s\n", decoded)
-
-	jwt.JwtHello()
+	fmt.Println("Hello, world!")
 }
