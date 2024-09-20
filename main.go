@@ -26,9 +26,7 @@ func main() {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	fmt.Println("Secret is: ", config.Secret, "\n");
-
-
+	fmt.Println("Secret is: ", config.Secret)
 
 	msg := "I am sigma!"
 	
