@@ -17,14 +17,10 @@ func (model *Model) ValidateToken(tokenSigned string) (bool, error) {
 		return model.Secret[:], nil
 	}
 
-	token, err := jwt.Parse(tokenSigned, keyFunc)
+	var claims Claims
+	_, err := jwt.ParseWithClaims(tokenSigned, &claims, keyFunc)
 	if err != nil {
 		return false, err
-	}
-
-	claims, ok := token.Claims.(Claims)
-	if !ok {
-		return false, fmt.Errorf("failed to parse claims of token")
 	}
 
 	if time.Now().Before(claims.NotBefore.Time) {
