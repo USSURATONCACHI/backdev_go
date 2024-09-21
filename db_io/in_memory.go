@@ -2,24 +2,16 @@ package db_io
 
 import (
 	"errors"
-
-	"github.com/google/uuid"
 )
 
 type InMemoryDatabase struct {
 	Entries []RefreshTokenEntry
 }
 
-func (db *InMemoryDatabase) Get_RefreshTokenEntry(token uuid.UUID) (*RefreshTokenEntry, error) {
+func (db *InMemoryDatabase) Get_RefreshTokenEntry(entry RefreshTokenEntry) (*RefreshTokenEntry, error) {
 	for i := 0; i < len(db.Entries); i++ {
-		if db.Entries[i].RefreshToken == token {
-
-			found := &db.Entries[i]
-			result := RefreshTokenEntry {
-				RefreshToken: found.RefreshToken,
-				RelatedAccessTokenUuid: found.RelatedAccessTokenUuid,
-			}
-
+		if db.Entries[i].BcryptHash == entry.BcryptHash {
+			result := db.Entries[i].Copy()
 			return &result, nil
 		}
 	}
@@ -29,8 +21,8 @@ func (db *InMemoryDatabase) Get_RefreshTokenEntry(token uuid.UUID) (*RefreshToke
 
 func (db *InMemoryDatabase) Add_RefreshTokenEntry(entry RefreshTokenEntry) *error {
 	for i := 0; i < len(db.Entries); i++ {
-		if db.Entries[i].RefreshToken == entry.RefreshToken {
-			result := errors.New("Entry with such primary UUID already exists")
+		if db.Entries[i].BcryptHash == entry.BcryptHash {
+			result := errors.New("Such refresh token already exists")
 			return &result
 		}
 	}
@@ -39,14 +31,14 @@ func (db *InMemoryDatabase) Add_RefreshTokenEntry(entry RefreshTokenEntry) *erro
 	return nil
 }
 
-func (db *InMemoryDatabase) Remove_RefreshTokenEntry(token uuid.UUID) *error {
+func (db *InMemoryDatabase) Remove_RefreshTokenEntry(entry RefreshTokenEntry) *error {
 	for i := 0; i < len(db.Entries); i++ {
-		if db.Entries[i].RefreshToken == token {
+		if db.Entries[i].BcryptHash == entry.BcryptHash {
 			db.Entries = append(db.Entries[:i], db.Entries[i+1:]...)
 			return nil
 		}
 	}
 	
-	result := errors.New("No such entry exists")
+	result := errors.New("No such refresh token exists")
 	return &result
 }

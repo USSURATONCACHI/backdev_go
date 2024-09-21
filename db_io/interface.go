@@ -1,14 +1,18 @@
 package db_io
 
-import "github.com/google/uuid"
-
 type RefreshTokenEntry struct {
-	RefreshToken uuid.UUID
-	RelatedAccessTokenUuid uuid.UUID
+	BcryptHash string
 }
 
+func (entry RefreshTokenEntry) Copy() RefreshTokenEntry {
+	return RefreshTokenEntry {
+		BcryptHash: entry.BcryptHash,
+	}
+}
+
+
 type Database interface {
-	Get_RefreshTokenEntry(token uuid.UUID) (*RefreshTokenEntry, error);
+	Get_RefreshTokenEntry(entry RefreshTokenEntry) (*RefreshTokenEntry, error);
 	Add_RefreshTokenEntry(entry RefreshTokenEntry) *error;
-	Remove_RefreshTokenEntry(token uuid.UUID) *error;
+	Remove_RefreshTokenEntry(entry RefreshTokenEntry) *error;
 }
