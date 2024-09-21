@@ -48,18 +48,25 @@ type AuthorizeResponse struct {
 	AccessToken string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
+type ErrorJson struct {
+	Error string `json:"error"`
+}
 
 func ServerAuthorize(c *gin.Context, mdl model.Model) {
 	var request AuthorizeRequest
 	err := c.BindJSON(&request)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, ErrorJson {
+			Error: err.Error(),
+		})
 		return
 	}
 	
 	tokens, err := mdl.CreateToken(request.UserUuid)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, ErrorJson {
+			Error: err.Error(),
+		})
 		return
 	}
 
@@ -79,14 +86,18 @@ func ServerValidate(c *gin.Context, mdl model.Model) {
 	var request ValidateRequest
 	err := c.BindJSON(&request)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, ErrorJson {
+			Error: err.Error(),
+		})
 		return
 	}
 
 	result, err := mdl.ValidateToken(request.AccessToken)
 
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
+		c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorJson {
+			Error: err.Error(),
+		})
 		return
 	}
 	if result {

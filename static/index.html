@@ -3,9 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>backdev playground</title>
+    <title>API Test Tool</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .output-zone {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        .response-code {
+            font-weight: bold;
+            padding: 5px;
+            border-radius: 3px;
+            color: white;
+            background-color: gray;
+        }
+        .response-2 { background-color: green; }
+        .response-4 { background-color: orange; }
+        .response-5 { background-color: red; }
+    </style>
 </head>
-<body>
-    <h1>Hello, world!</h1>
+<body class="container">
+    <h1 class="mt-5">API Test Tool</h1>
+    
+    <div class="card mt-3">
+        <div class="card-body">
+            <form id="apiForm">
+                <div class="form-group">
+                    <label for="method">HTTP Method:</label>
+                    <input type="text" id="method" class="form-control" value="POST" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="endpoint">API Endpoint:</label>
+                    <input type="text" id="endpoint" class="form-control" value="/authorize" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="requestBody">Request Body (JSON):</label>
+                    <textarea id="requestBody" class="form-control" rows="4" required>{"user_uuid": "your-uuid-here"}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+            <div class="output-zone mt-3" id="outputZone">
+                <div id="responseCode" class="response-code">?</div>
+                <pre id="responseData"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('apiForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const method = document.getElementById('method').value;
+            const endpoint = document.getElementById('endpoint').value;
+            const requestBody = document.getElementById('requestBody').value;
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: requestBody,
+                });
+
+                let data = await response.text();
+                try {
+                    data = JSON.parse(data);
+                    data = JSON.stringify(data, null, 2);
+                } catch (error) {}
+
+                // Display response code and data
+                const responseCodeElement = document.getElementById('responseCode');
+                responseCodeElement.textContent = `HTTP ${response.status}`;
+                responseCodeElement.className = `response-code response-${Math.floor(response.status / 100)}`;
+
+                document.getElementById('responseData').textContent = data;
+            } catch (error) {
+                document.getElementById('responseCode').textContent = 'Error occurred';
+                document.getElementById('responseData').textContent = error.toString();
+            }
+        });
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
