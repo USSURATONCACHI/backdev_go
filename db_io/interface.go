@@ -1,18 +1,27 @@
 package db_io
 
-type RefreshTokenEntry struct {
-	BcryptHash []byte
+import (
+	"github.com/google/uuid"
+)
+
+type RefreshToken struct {
+	JwtTokenUuid uuid.UUID
+	RefreshBcryptHash []byte
 }
 
-func (entry RefreshTokenEntry) Copy() RefreshTokenEntry {
-	return RefreshTokenEntry {
-		BcryptHash: entry.BcryptHash,
+func (entry RefreshToken) Copy() RefreshToken {
+	result := RefreshToken {
+		JwtTokenUuid: entry.JwtTokenUuid,
 	}
+
+	copy(result.RefreshBcryptHash, entry.RefreshBcryptHash)
+
+	return result
 }
 
 
 type Database interface {
-	Get_RefreshTokenEntry(entry RefreshTokenEntry) (*RefreshTokenEntry, error);
-	Add_RefreshTokenEntry(entry RefreshTokenEntry) error;
-	Remove_RefreshTokenEntry(entry RefreshTokenEntry) error;
+	Get_RefreshToken(jwtTokenUuid uuid.UUID) (*RefreshToken, error);
+	Remove_RefreshToken(jwtTokenUuid uuid.UUID) error;
+	Add_RefreshToken(token RefreshToken) error;
 }
