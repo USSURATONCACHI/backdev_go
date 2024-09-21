@@ -31,6 +31,8 @@ func CreateServer(mdl model.Model) Server {
 		func(ctx *gin.Context) { ServerValidate(ctx, server.Model) },
 	)
 
+	server.GinEngine.Static("/", "./static")
+
 	return server
 }
 
