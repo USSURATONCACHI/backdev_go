@@ -21,6 +21,14 @@ func (entry RefreshToken) Copy() RefreshToken {
 }
 
 
+type DatabaseParams struct {
+	Host string
+	Port int16
+	User string
+	Password string
+	DbName string
+}
+
 type Database interface {
 	Get_RefreshToken(jwtTokenUuid uuid.UUID) (*RefreshToken, error);
 	Remove_RefreshToken(jwtTokenUuid uuid.UUID) error;

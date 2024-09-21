@@ -1,16 +1,24 @@
-Secret = "MyAllBase"
+secret = "MyAllBase" # Any string. Is will be SHA512-hashed into 64-byte secret for JWT.
+dbType = "postgresql" # Allowed: in_memory, postgresql
 
-StartSyllables = [
+[postgresql]
+host = "localhost"
+port = 5432
+user = "postgres"
+password = "postgres"
+dbName = "backdev"
+
+# Used for user name generation only
+[syllables]
+start = [
     "Al", "Be", "Cor", "Dan", "El", "Fa", "Gal", "Hel", "Ir", "Ja", "Ka", "Lam", "Mar", "Nor", "Or", "Pe", 
     "Quin", "Ral", "Sam", "Tal", "Ul", "Vin", "Wes", "Xan", "Yan", "Zor", "Bra", "Ce", "Di", "Ev"
 ]
-
-MiddleSyllables = [
+middle = [
     "a", "el", "is", "on", "ar", "eth", "ir", "il", "an", "or", "el", "os", "ur", "ia", "yn", "er", 
     "om", "as", "in", "ir", "en", "al", "es", "ur", "yl", "ai", "an", "il", "or", "er", "yl", "in"
 ]
-
-FinalSyllables = [
+final = [
     "dar", "n", "tan", "ros", "rim", "nos", "vel", "an", "mir", "d", "a", "en", "dar", "ath", "an", "ar", 
     "ros", "dar", "ath", "en", "dar", "or", "en", "mir", "ran", "dran"
 ]

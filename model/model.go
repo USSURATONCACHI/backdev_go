@@ -17,10 +17,7 @@ type Claims struct {
 type Model struct {
 	Secret [64]byte
 	Database db_io.Database
-
-	StartSyllables []string
-	MiddleSyllables []string
-	FinalSyllables []string
+	Syllables Syllables
 }
 
 type JwtAndRefreshTokens struct {
