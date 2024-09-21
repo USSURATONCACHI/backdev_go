@@ -7,14 +7,14 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-type AppConfig struct {
+type WrittenAppConfig struct {
 	Secret string
 }
 
-func GetConfigFromCli() (AppConfig, error) {
+func GetConfigFromCli() (WrittenAppConfig, error) {
 	// Get CLI argument
 	if len(os.Args) != 2 {
-		return AppConfig{}, errors.New("wrong amount of CLI arguments passed (must be 1)")
+		return WrittenAppConfig{}, errors.New("wrong amount of CLI arguments passed (must be 1)")
 	}
 	filePath := os.Args[1]
 	
@@ -22,21 +22,21 @@ func GetConfigFromCli() (AppConfig, error) {
 	fsys := os.DirFS(".")
 	file, err := fsys.Open(filePath)
 	if err != nil {
-		return AppConfig{}, errors.New("error opening config file: " + err.Error())
+		return WrittenAppConfig{}, errors.New("error opening config file: " + err.Error())
 	}
 	defer file.Close()
 
 	// Read the file
 	content, err := io.ReadAll(file)
 	if err != nil {
-		return AppConfig{}, errors.New("error reading config file: " + err.Error())
+		return WrittenAppConfig{}, errors.New("error reading config file: " + err.Error())
 	}
 	
 	// Parse TOML
-	var conf AppConfig
+	var conf WrittenAppConfig
 	_, err = toml.Decode(string(content), &conf)
 	if err != nil {
-		return AppConfig{}, errors.New("error parsing config file: " + err.Error())
+		return WrittenAppConfig{}, errors.New("error parsing config file: " + err.Error())
 	}
 
 	return conf, nil
