@@ -88,7 +88,7 @@ func (psql *PostgresqlDatabase) Get_RefreshToken(jwtTokenUuid uuid.UUID) (*Refre
 		var access_token_uuid uuid.UUID
 		var refresh_bcypt []byte
 
-		err = rows.Scan(access_token_uuid, refresh_bcypt)
+		err = rows.Scan(&access_token_uuid, &refresh_bcypt)
 		if err != nil {
 			return nil, err
 		}
