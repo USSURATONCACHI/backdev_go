@@ -7,6 +7,7 @@ import (
 
 	"crypto/sha512"
 
+	"backdev_go/db_io"
 	"backdev_go/model"
 )
 
@@ -25,6 +26,7 @@ func main() {
 	// Create model
 	mdl := model.Model {
 		Secret: sha512.Sum512([]byte(writtenConfig.Secret)),
+		Database: db_io.InMemoryDatabaseNew(),
 
 		StartSyllables: writtenConfig.StartSyllables,
 		MiddleSyllables: writtenConfig.MiddleSyllables,

@@ -9,7 +9,13 @@ type InMemoryDatabase struct {
 	Entries []RefreshToken
 }
 
-func (db *InMemoryDatabase) Get_RefreshTokenEntry(jwtTokenUuid uuid.UUID) (*RefreshToken, error) {
+func InMemoryDatabaseNew() *InMemoryDatabase {
+	return &InMemoryDatabase {
+		Entries: make([]RefreshToken, 0),
+	}
+}
+
+func (db *InMemoryDatabase) Get_RefreshToken(jwtTokenUuid uuid.UUID) (*RefreshToken, error) {
 	for i := 0; i < len(db.Entries); i++ {
 		if db.Entries[i].JwtTokenUuid == jwtTokenUuid {
 			result := db.Entries[i].Copy()
@@ -20,7 +26,7 @@ func (db *InMemoryDatabase) Get_RefreshTokenEntry(jwtTokenUuid uuid.UUID) (*Refr
 	return nil, nil
 }
 
-func (db *InMemoryDatabase) Add_RefreshTokenEntry(token RefreshToken) error {
+func (db *InMemoryDatabase) Add_RefreshToken(token RefreshToken) error {
 	for i := 0; i < len(db.Entries); i++ {
 		if db.Entries[i].JwtTokenUuid == token.JwtTokenUuid {
 			return errors.New("such refresh token already exists")
@@ -31,7 +37,7 @@ func (db *InMemoryDatabase) Add_RefreshTokenEntry(token RefreshToken) error {
 	return nil
 }
 
-func (db *InMemoryDatabase) Remove_RefreshTokenEntry(jwtTokenUuid uuid.UUID) error {
+func (db *InMemoryDatabase) Remove_RefreshToken(jwtTokenUuid uuid.UUID) error {
 	for i := 0; i < len(db.Entries); i++ {
 		if db.Entries[i].JwtTokenUuid == jwtTokenUuid {
 			db.Entries = append(db.Entries[:i], db.Entries[i+1:]...)

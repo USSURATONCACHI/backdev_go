@@ -55,16 +55,15 @@ func ServerAuthorize(c *gin.Context, mdl model.Model) {
 		return
 	}
 	
-	token, err := mdl.CreateTokenString(request.UserUuid)
-	
+	tokens, err := mdl.CreateToken(request.UserUuid)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	response := AuthorizeResponse {
-		AccessToken: token,
-		RefreshToken: "none",
+		AccessToken: tokens.JwtToken,
+		RefreshToken: tokens.RefreshToken.String(),
 	}
 
 	c.IndentedJSON(http.StatusOK, response)
