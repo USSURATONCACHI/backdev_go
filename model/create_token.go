@@ -11,10 +11,11 @@ import (
 	"backdev_go/db_io"
 )
 
-func (model *Model) createRawSignedJwtToken(tokenUuid uuid.UUID, userUuid uuid.UUID) (string, error) {
+func (model *Model) createRawSignedJwtToken(tokenUuid uuid.UUID, userUuid uuid.UUID, userIp string) (string, error) {
 	claims := Claims {
 		UserUuid: userUuid,
 		UserName: model.Syllables.HumanNameFromUuid(userUuid),
+		UserIp: userIp,
 
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Minute)),
@@ -34,7 +35,7 @@ func (model *Model) createRawSignedJwtToken(tokenUuid uuid.UUID, userUuid uuid.U
 }
 
 // Returns: (Success Result, Server error)
-func (model *Model) CreateToken(userUuid uuid.UUID) (*JwtAndRefreshTokens, error) {
+func (model *Model) CreateToken(userUuid uuid.UUID, userIp string) (*JwtAndRefreshTokens, error) {
 	thisTokenUuid := uuid.New()
 	refreshTokenUuid := uuid.New()
 
@@ -55,7 +56,7 @@ func (model *Model) CreateToken(userUuid uuid.UUID) (*JwtAndRefreshTokens, error
 	}
 	
 	// Generate JWT token
-	jwtToken, err := model.createRawSignedJwtToken(thisTokenUuid, userUuid)
+	jwtToken, err := model.createRawSignedJwtToken(thisTokenUuid, userUuid, userIp)
 	if err != nil {
 		return nil, err
 	}

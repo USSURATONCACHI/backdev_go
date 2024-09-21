@@ -1,5 +1,6 @@
 secret = "MyAllBase" # Any string. Is will be SHA512-hashed into 64-byte secret for JWT.
 dbType = "postgresql" # Allowed: in_memory, postgresql
+mockUserEmail = "redchindaniil+backdev@gmail.com"
 
 [postgresql]
 host = "localhost"

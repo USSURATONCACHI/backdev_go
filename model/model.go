@@ -10,6 +10,7 @@ import (
 type Claims struct {
 	UserUuid uuid.UUID  `json:"user_uuid"`
 	UserName string     `json:"user_name"`
+	UserIp   string     `json:"user_ip"`
 
 	jwt.RegisteredClaims
 }
