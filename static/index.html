@@ -11,6 +11,7 @@
     <script src="/index.js"></script>
     <h1 class="mt-5">API Test Tool</h1>
     
+    <!-- AUTHORIZE -->
     <div class="card mt-3">
         <div class="card-body">
             <form id="authorize-apiForm">
@@ -24,19 +25,55 @@
                 </div>
                 <div class="form-group">
                     <label for="requestBody">Request Body (JSON):</label>
-                    <textarea id="authorize-requestBody" class="form-control" rows="4" required>{"user_uuid": "your-uuid-here"}</textarea>
+<textarea id="authorize-requestBody" class="form-control" rows="4" required>
+{
+    "user_uuid": "your_uuid_here"
+}
+</textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Send</button>
+                <button type="reset" class="btn btn-danger">Reset form</button>
             </form>
             <div class="output-zone mt-3">
                 <div id="authorize-responseCode" class="response-code">?</div>
-                <pre id="authorize-responseData"></pre>
+                <pre id="authorize-responseData" class="response-data"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- VALIDATE -->
+    <div class="card mt-3">
+        <div class="card-body">
+            <form id="validate-apiForm">
+                <div class="form-group">
+                    <label for="method">HTTP Method:</label>
+                    <input type="text" id="validate-method" class="form-control" value="POST" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="endpoint">API Endpoint:</label>
+                    <input type="text" id="validate-endpoint" class="form-control" value="/validate" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="requestBody">Request Body (JSON):</label>
+<textarea id="validate-requestBody" class="form-control" rows="4" required>
+{
+    "access_token": "token_here"
+}
+</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send</button>
+                <button type="reset" class="btn btn-danger">Reset form</button>
+            </form>
+            <div class="output-zone mt-3">
+                <div id="validate-responseCode" class="response-code">?</div>
+                <pre id="validate-responseData" class="response-data"></pre>
             </div>
         </div>
     </div>
 
     <script>
         addSubmitListener('authorize-')
+        addSubmitListener('validate-')
     </script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>

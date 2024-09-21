@@ -14,3 +14,8 @@
 .response-2 { background-color: green; }
 .response-4 { background-color: orange; }
 .response-5 { background-color: red; }
+
+.response-data {
+    white-space: pre-wrap; /* Preserves spaces and newlines while allowing wrapping */
+    overflow-wrap: break-word; /* Breaks words to fit in container */
+}

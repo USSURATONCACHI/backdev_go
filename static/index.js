@@ -25,7 +25,9 @@ function addSubmitListener(id_prefix) {
             try {
                 data = JSON.parse(data);
                 data = JSON.stringify(data, null, 2);
-            } catch (error) {}
+            } catch (error) {
+                console.log('Failed to JSON parse data')
+            }
 
             // Display response code and data
             responseCodeElem.textContent = `HTTP ${response.status}`;
