@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/base64"
 	"errors"
 	"time"
 
