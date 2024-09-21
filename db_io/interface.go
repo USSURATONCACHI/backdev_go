@@ -1,7 +1,7 @@
 package db_io
 
 type RefreshTokenEntry struct {
-	BcryptHash string
+	BcryptHash []byte
 }
 
 func (entry RefreshTokenEntry) Copy() RefreshTokenEntry {
@@ -13,6 +13,6 @@ func (entry RefreshTokenEntry) Copy() RefreshTokenEntry {
 
 type Database interface {
 	Get_RefreshTokenEntry(entry RefreshTokenEntry) (*RefreshTokenEntry, error);
-	Add_RefreshTokenEntry(entry RefreshTokenEntry) *error;
-	Remove_RefreshTokenEntry(entry RefreshTokenEntry) *error;
+	Add_RefreshTokenEntry(entry RefreshTokenEntry) error;
+	Remove_RefreshTokenEntry(entry RefreshTokenEntry) error;
 }

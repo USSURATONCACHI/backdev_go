@@ -1,6 +1,7 @@
 package db_io
 
 import (
+	"bytes"
 	"errors"
 )
 
@@ -10,7 +11,7 @@ type InMemoryDatabase struct {
 
 func (db *InMemoryDatabase) Get_RefreshTokenEntry(entry RefreshTokenEntry) (*RefreshTokenEntry, error) {
 	for i := 0; i < len(db.Entries); i++ {
-		if db.Entries[i].BcryptHash == entry.BcryptHash {
+		if bytes.Equal(db.Entries[i].BcryptHash, entry.BcryptHash) {
 			result := db.Entries[i].Copy()
 			return &result, nil
 		}
@@ -19,11 +20,10 @@ func (db *InMemoryDatabase) Get_RefreshTokenEntry(entry RefreshTokenEntry) (*Ref
 	return nil, nil
 }
 
-func (db *InMemoryDatabase) Add_RefreshTokenEntry(entry RefreshTokenEntry) *error {
+func (db *InMemoryDatabase) Add_RefreshTokenEntry(entry RefreshTokenEntry) error {
 	for i := 0; i < len(db.Entries); i++ {
-		if db.Entries[i].BcryptHash == entry.BcryptHash {
-			result := errors.New("Such refresh token already exists")
-			return &result
+		if bytes.Equal(db.Entries[i].BcryptHash, entry.BcryptHash) {
+			return errors.New("such refresh token already exists")
 		}
 	}
 	
@@ -31,14 +31,13 @@ func (db *InMemoryDatabase) Add_RefreshTokenEntry(entry RefreshTokenEntry) *erro
 	return nil
 }
 
-func (db *InMemoryDatabase) Remove_RefreshTokenEntry(entry RefreshTokenEntry) *error {
+func (db *InMemoryDatabase) Remove_RefreshTokenEntry(entry RefreshTokenEntry) error {
 	for i := 0; i < len(db.Entries); i++ {
-		if db.Entries[i].BcryptHash == entry.BcryptHash {
+		if bytes.Equal(db.Entries[i].BcryptHash, entry.BcryptHash) {
 			db.Entries = append(db.Entries[:i], db.Entries[i+1:]...)
 			return nil
 		}
 	}
 	
-	result := errors.New("No such refresh token exists")
-	return &result
+	return errors.New("no such refresh token exists")
 }
