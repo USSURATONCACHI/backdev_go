@@ -18,11 +18,10 @@ type JwtAndRefreshTokens struct {
 	RefreshToken uuid.UUID
 }
 
-func (model *Model) createRawSignedJwtToken(tokenUuid uuid.UUID, refreshBcryptBase64 string, userUuid uuid.UUID) (string, error) {
+func (model *Model) createRawSignedJwtToken(tokenUuid uuid.UUID, userUuid uuid.UUID) (string, error) {
 	claims := Claims {
 		UserUuid: userUuid,
 		UserName: model.GenerateNameFromUuid(userUuid),
-		RefreshToken: refreshBcryptBase64,
 
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Minute)),
@@ -49,7 +48,6 @@ func (model *Model) CreateToken(userUuid uuid.UUID) (*JwtAndRefreshTokens, error
 	if err != nil {
 		return nil, errors.New("failed to create a bcrypt hash: " + err.Error())
 	}
-	refreshBcryptBase64 := base64.StdEncoding.EncodeToString(refreshBcrypt)
 
 	// Add refresh token
 	err = model.Database.Add_RefreshToken(
@@ -63,7 +61,7 @@ func (model *Model) CreateToken(userUuid uuid.UUID) (*JwtAndRefreshTokens, error
 	}
 	
 	// Generate JWT token
-	jwtToken, err := model.createRawSignedJwtToken(thisTokenUuid, refreshBcryptBase64, userUuid)
+	jwtToken, err := model.createRawSignedJwtToken(thisTokenUuid, userUuid)
 	if err != nil {
 		return nil, err
 	}
