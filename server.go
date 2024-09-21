@@ -133,10 +133,14 @@ func ServerRefresh(c *gin.Context, mdl model.Model) {
 		return
 	}
 
-	tokens, err := mdl.RefreshToken(request.AccessToken, refreshTokenUuid)
+	tokens, clientErr, serverErr := mdl.RefreshToken(request.AccessToken, refreshTokenUuid)
 
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorJson { Error: err.Error() })
+	if clientErr != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorJson { Error: clientErr.Error() })
+		return
+	}
+	if serverErr != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, ErrorJson { Error: serverErr.Error() })
 		return
 	}
 

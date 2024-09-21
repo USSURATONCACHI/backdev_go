@@ -11,7 +11,6 @@ import (
 	"backdev_go/db_io"
 )
 
-// ---- CreateToken
 func (model *Model) createRawSignedJwtToken(tokenUuid uuid.UUID, userUuid uuid.UUID) (string, error) {
 	claims := Claims {
 		UserUuid: userUuid,
@@ -34,6 +33,7 @@ func (model *Model) createRawSignedJwtToken(tokenUuid uuid.UUID, userUuid uuid.U
 	return ss, nil
 }
 
+// Returns: (Success Result, Server error)
 func (model *Model) CreateToken(userUuid uuid.UUID) (*JwtAndRefreshTokens, error) {
 	thisTokenUuid := uuid.New()
 	refreshTokenUuid := uuid.New()

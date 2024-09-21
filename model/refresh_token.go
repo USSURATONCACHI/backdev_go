@@ -7,43 +7,50 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// ---- CreateToken
-func (model *Model) RefreshToken(tokenString string, refreshToken uuid.UUID) (*JwtAndRefreshTokens, error) {
+// Returns (Success result, Client error, Server error)
+func (model *Model) RefreshToken(tokenString string, refreshToken uuid.UUID) (*JwtAndRefreshTokens, error, error) {
+	// Check that token is valid
 	is_valid, err := model.ValidateToken(tokenString)
 	if err != nil {
-		return nil, err
+		return nil, err, nil
 	}
-
 	if !is_valid {
-		return nil, errors.New("cannot refresh invalid token")
+		return nil, errors.New("token is invalid"), nil
 	}
 
-	
+	// Parse token claims
 	keyFunc := model.getJwtKeyFunc()
 	var claims Claims
 	_, err = jwt.ParseWithClaims(tokenString, &claims, keyFunc)	
 	if err != nil {
-		return nil, errors.New("somehow failed to parse verified token")
+		return nil, nil, errors.New("somehow failed to parse verified token")
 	}
 
 	tokenUuid, err := uuid.Parse(claims.ID)
 	if err != nil {
-		return nil, errors.New("token does not contain a valid uuid")
+		return nil, nil, errors.New("token does not contain a valid uuid")
 	}
 
+	// Check DB for that token
 	refreshTokenEntry, err := model.Database.Get_RefreshToken(tokenUuid)
-	if err != nil || refreshTokenEntry == nil {
-		return nil, errors.New("invalid JWT + Refresh tokens pair")
+	if err != nil {
+		return nil, nil, err
+	}
+	if refreshTokenEntry == nil {
+		return nil, errors.New("invalid JWT + Refresh tokens pair"), nil
 	}
 	err = bcrypt.CompareHashAndPassword(refreshTokenEntry.RefreshBcryptHash, refreshToken[:])
 	if err != nil {
-		return nil, errors.New("invalid JWT + Refresh tokens pair")
+		return nil, errors.New("invalid JWT + Refresh tokens pair"), nil
 	}
 
+	// Delete used token
 	err = model.Database.Remove_RefreshToken(tokenUuid)
 	if err != nil {
-		return nil, errors.New("failed to remove old refresh token: " + err.Error())
+		return nil, nil, errors.New("failed to remove old refresh token: " + err.Error())
 	}
 
-	return model.CreateToken(claims.UserUuid)
+	// Success
+	success, serverError := model.CreateToken(claims.UserUuid)
+	return success, nil, serverError
 }
