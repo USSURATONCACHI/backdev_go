@@ -1,1 +1,16 @@
 Secret = "MyAllBase"
+
+StartSyllables = [
+    "Al", "Be", "Cor", "Dan", "El", "Fa", "Gal", "Hel", "Ir", "Ja", "Ka", "Lam", "Mar", "Nor", "Or", "Pe", 
+    "Quin", "Ral", "Sam", "Tal", "Ul", "Vin", "Wes", "Xan", "Yan", "Zor", "Bra", "Ce", "Di", "Ev"
+]
+
+MiddleSyllables = [
+    "a", "el", "is", "on", "ar", "eth", "ir", "il", "an", "or", "el", "os", "ur", "ia", "yn", "er", 
+    "om", "as", "in", "ir", "en", "al", "es", "ur", "yl", "ai", "an", "il", "or", "er", "yl", "in"
+]
+
+FinalSyllables = [
+    "dar", "n", "tan", "ros", "rim", "nos", "vel", "an", "mir", "d", "a", "en", "dar", "ath", "an", "ar", 
+    "ros", "dar", "ath", "en", "dar", "or", "en", "mir", "ran", "dran"
+]

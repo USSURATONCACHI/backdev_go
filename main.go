@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"crypto/sha512"
+
+	"backdev_go/model"
 )
 
 
@@ -21,13 +23,17 @@ func main() {
 	}
 
 	// Create model
-	model := Model {
-		secret: sha512.Sum512([]byte(writtenConfig.Secret)),
+	mdl := model.Model {
+		Secret: sha512.Sum512([]byte(writtenConfig.Secret)),
+
+		StartSyllables: writtenConfig.StartSyllables,
+		MiddleSyllables: writtenConfig.MiddleSyllables,
+		FinalSyllables: writtenConfig.FinalSyllables,
 	}
-	fmt.Println("Your base64 of secret: ", base64.StdEncoding.EncodeToString(model.secret[:]))
+	fmt.Println("Your base64 of secret: ", base64.StdEncoding.EncodeToString(mdl.Secret[:]))
 	
 
 	// Run server
-	server := CreateServer(model)
+	server := CreateServer(mdl)
 	server.Run("localhost:8080")
 }

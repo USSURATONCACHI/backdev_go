@@ -1,14 +1,15 @@
-package main
+package model
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type Claims struct {
-	UserUuid string     `json:"user_uuid"`
+	UserUuid uuid.UUID  `json:"user_uuid"`
 	UserName string     `json:"user_name"`
 	RefreshToken string `json:"refresh_token"`
 
@@ -16,13 +17,20 @@ type Claims struct {
 }
 
 type Model struct {
-	secret [64]byte
+	Secret [64]byte
+
+	StartSyllables []string
+	MiddleSyllables []string
+	FinalSyllables []string
 }
 
-func (model Model) CreateToken(userUuid string) *jwt.Token {
+
+
+
+func (model *Model) CreateToken(userUuid uuid.UUID) *jwt.Token {
 	claims := Claims {
 		UserUuid: userUuid,
-		UserName: "John Pork",
+		UserName: model.GenerateNameFromUuid(userUuid),
 
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Minute)),
@@ -36,9 +44,9 @@ func (model Model) CreateToken(userUuid string) *jwt.Token {
 	return token
 }
 
-func (model Model) CreateTokenString(userUuid string) (string, error) {
+func (model *Model) CreateTokenString(userUuid uuid.UUID) (string, error) {
 	token := model.CreateToken(userUuid)
-	ss, err := token.SignedString(model.secret[:])
+	ss, err := token.SignedString(model.Secret[:])
 
 	if err != nil {
 		return "", err
@@ -47,13 +55,15 @@ func (model Model) CreateTokenString(userUuid string) (string, error) {
 	return ss, nil
 }
 
-func (model Model) ValidateToken(tokenSigned string) (bool, error) {
+
+
+func (model *Model) ValidateToken(tokenSigned string) (bool, error) {
 	keyFunc := func(t *jwt.Token) (interface{}, error) {
 		if t.Method.Alg() != jwt.SigningMethodHS512.Alg() {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Method.Alg())
 		}
 
-		return model.secret[:], nil
+		return model.Secret[:], nil
 	}
 
 	token, err := jwt.Parse(tokenSigned, keyFunc)
@@ -75,3 +85,4 @@ func (model Model) ValidateToken(tokenSigned string) (bool, error) {
 
 	return true, nil
 }
+

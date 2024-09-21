@@ -9,6 +9,10 @@ import (
 
 type WrittenAppConfig struct {
 	Secret string
+	
+	StartSyllables []string
+	MiddleSyllables []string
+	FinalSyllables []string
 }
 
 func GetConfigFromCli() (WrittenAppConfig, error) {

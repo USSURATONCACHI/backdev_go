@@ -3,17 +3,20 @@ package main
 import (
 	"net/http"
 
+	"backdev_go/model"
+
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type Server struct {
-	Model Model
+	Model model.Model
 	GinEngine *gin.Engine
 }
 
-func CreateServer(model Model) Server {
+func CreateServer(mdl model.Model) Server {
 	server := Server {
-		Model: model,
+		Model: mdl,
 		GinEngine: gin.Default(),
 	}
 
@@ -37,22 +40,22 @@ func (server Server) Run(ip string) {
 
 
 type AuthorizeRequest struct {
-	UserUuid string `json:"user_uuid"`
+	UserUuid uuid.UUID `json:"user_uuid"`
 }
 type AuthorizeResponse struct {
 	AccessToken string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
 
-func ServerAuthorize(c *gin.Context, model Model) {
+func ServerAuthorize(c *gin.Context, mdl model.Model) {
 	var request AuthorizeRequest
 	err := c.BindJSON(&request)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, err)
+		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 	
-	token, err := model.CreateTokenString(request.UserUuid)
+	token, err := mdl.CreateTokenString(request.UserUuid)
 	
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -71,7 +74,7 @@ func ServerAuthorize(c *gin.Context, model Model) {
 type ValidateRequest struct {
 	AccessToken string `json:"access_token"`
 }
-func ServerValidate(c *gin.Context, model Model) {
+func ServerValidate(c *gin.Context, mdl model.Model) {
 	var request ValidateRequest
 	err := c.BindJSON(&request)
 	if err != nil {
@@ -79,7 +82,7 @@ func ServerValidate(c *gin.Context, model Model) {
 		return
 	}
 
-	result, err := model.ValidateToken(request.AccessToken)
+	result, err := mdl.ValidateToken(request.AccessToken)
 
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
