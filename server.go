@@ -31,6 +31,11 @@ func CreateServer(mdl model.Model) Server {
 		func(ctx *gin.Context) { ServerValidate(ctx, server.Model) },
 	)
 
+	server.GinEngine.POST(
+		"/refresh", 
+		func(ctx *gin.Context) { ServerRefresh(ctx, server.Model) },
+	)
+
 	server.GinEngine.Static("/", "./static")
 
 	return server
@@ -106,4 +111,39 @@ func ServerValidate(c *gin.Context, mdl model.Model) {
 		c.AbortWithStatus(http.StatusUnauthorized)
 	}
 
+}
+
+
+type RefreshRequest struct {
+	AccessToken string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+type RefreshResponse AuthorizeResponse;
+func ServerRefresh(c *gin.Context, mdl model.Model) {
+	var request RefreshRequest
+	err := c.BindJSON(&request)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, ErrorJson { Error: err.Error() })
+		return
+	}
+
+	refreshTokenUuid, err := uuid.Parse(request.RefreshToken)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, ErrorJson { Error: err.Error() })
+		return
+	}
+
+	tokens, err := mdl.RefreshToken(request.AccessToken, refreshTokenUuid)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorJson { Error: err.Error() })
+		return
+	}
+
+	response := RefreshResponse {
+		AccessToken: tokens.JwtToken,
+		RefreshToken: tokens.RefreshToken.String(),
+	}
+
+	c.IndentedJSON(http.StatusOK, response)
 }

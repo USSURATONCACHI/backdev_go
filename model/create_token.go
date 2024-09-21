@@ -12,11 +12,6 @@ import (
 )
 
 // ---- CreateToken
-type JwtAndRefreshTokens struct {
-	JwtToken string
-	RefreshToken uuid.UUID
-}
-
 func (model *Model) createRawSignedJwtToken(tokenUuid uuid.UUID, userUuid uuid.UUID) (string, error) {
 	claims := Claims {
 		UserUuid: userUuid,

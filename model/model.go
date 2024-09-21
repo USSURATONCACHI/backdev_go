@@ -22,3 +22,8 @@ type Model struct {
 	MiddleSyllables []string
 	FinalSyllables []string
 }
+
+type JwtAndRefreshTokens struct {
+	JwtToken string
+	RefreshToken uuid.UUID
+}

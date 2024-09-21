@@ -12,6 +12,7 @@ type RefreshToken struct {
 func (entry RefreshToken) Copy() RefreshToken {
 	result := RefreshToken {
 		JwtTokenUuid: entry.JwtTokenUuid,
+		RefreshBcryptHash: make([]byte, len(entry.RefreshBcryptHash)),
 	}
 
 	copy(result.RefreshBcryptHash, entry.RefreshBcryptHash)
