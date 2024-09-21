@@ -13,9 +13,10 @@ import (
 
 func (model *Model) createRawSignedJwtToken(tokenUuid uuid.UUID, userUuid uuid.UUID, userIp string) (string, error) {
 	claims := Claims {
-		UserUuid: userUuid,
-		UserName: model.Syllables.HumanNameFromUuid(userUuid),
-		UserIp: userIp,
+		UserUuid:  userUuid,
+		UserName:  model.Syllables.HumanNameFromUuid(userUuid),
+		UserIp:    userIp,
+		TokenUuid: tokenUuid,
 
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Minute)),

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"backdev_go/db_io"
 	"errors"
 	"fmt"
 
@@ -9,52 +10,61 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Returns (Success result, Client error, Server error)
-func (model *Model) RefreshToken(tokenString string, refreshToken uuid.UUID, userIp string) (*JwtAndRefreshTokens, error, error) {
-	// Check that token is valid
+func (model *Model) refresh_CheckTokenValid(tokenString string) (error, error) {
 	is_valid, err := model.ValidateToken(tokenString)
 	if err != nil {
-		return nil, err, nil
+		return err, nil
 	}
 	if !is_valid {
-		return nil, errors.New("token is invalid"), nil
+		return errors.New("token is invalid"), nil
 	}
-
-	// Parse token claims
-	keyFunc := model.getJwtKeyFunc()
-	var claims Claims
-	_, err = jwt.ParseWithClaims(tokenString, &claims, keyFunc)	
-	if err != nil {
-		return nil, nil, errors.New("somehow failed to parse verified token")
-	}
-
-	tokenUuid, err := uuid.Parse(claims.ID)
-	if err != nil {
-		return nil, nil, errors.New("token does not contain a valid uuid")
-	}
-
-	if claims.UserIp != userIp {
-		fmt.Println("User IP changed, sending EMail warning")
-		panic("Not implemented yet")
-	}
-
-	// Check DB for that token
-	refreshTokenEntry, err := model.Database.Get_RefreshToken(tokenUuid)
-	if err != nil {
-		return nil, nil, err
+	return nil, nil
+}
+func (model *Model) refresh_CheckDatabaseForEntry(tokenUuid uuid.UUID, refreshToken uuid.UUID) (*db_io.RefreshToken, error, error) {
+	refreshTokenEntry, serverError := model.Database.Get_RefreshToken(tokenUuid)
+	if serverError != nil {
+		return nil, nil, serverError
 	}
 	if refreshTokenEntry == nil {
 		return nil, errors.New("invalid JWT + Refresh tokens pair"), nil
 	}
-	err = bcrypt.CompareHashAndPassword(refreshTokenEntry.RefreshBcryptHash, refreshToken[:])
-	if err != nil {
+	clientError := bcrypt.CompareHashAndPassword(refreshTokenEntry.RefreshBcryptHash, refreshToken[:])
+	if clientError != nil {
 		return nil, errors.New("invalid JWT + Refresh tokens pair"), nil
+	}
+	return refreshTokenEntry, nil, nil
+}
+
+// Returns (Success result, Client error, Server error)
+func (model *Model) RefreshToken(tokenString string, refreshToken uuid.UUID, userIp string) (*JwtAndRefreshTokens, error, error) {
+	clientError, serverError := model.refresh_CheckTokenValid(tokenString)
+	if clientError != nil {
+		return nil, clientError, serverError
+	}
+
+	// Parse token claims
+	var claims Claims
+	_, serverError = jwt.ParseWithClaims(tokenString, &claims, model.getJwtKeyFunc())	
+	if serverError != nil {
+		return nil, nil, errors.New("failed to parse already verified token")
+	}
+
+	// Check IP mismatch
+	if claims.UserIp != userIp {
+		fmt.Println("User IP changed, sending EMail warning")
+		// panic("Not implemented yet")
+	}
+
+	// Check DB for that token
+	_, clientError, serverError = model.refresh_CheckDatabaseForEntry(claims.TokenUuid, refreshToken)
+	if clientError != nil || serverError != nil {
+		return nil, clientError, serverError
 	}
 
 	// Delete used token
-	err = model.Database.Remove_RefreshToken(tokenUuid)
-	if err != nil {
-		return nil, nil, errors.New("failed to remove old refresh token: " + err.Error())
+	serverError = model.Database.Remove_RefreshToken(claims.TokenUuid)
+	if serverError != nil {
+		return nil, nil, errors.New("failed to remove old refresh token: " + serverError.Error())
 	}
 
 	// Success
