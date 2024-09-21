@@ -1,11 +1,16 @@
 package model
 
 import (
+	"encoding/base64"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
+
+	"backdev_go/db_io"
 )
 
 type Claims struct {
@@ -18,6 +23,7 @@ type Claims struct {
 
 type Model struct {
 	Secret [64]byte
+	Database db_io.Database
 
 	StartSyllables []string
 	MiddleSyllables []string
@@ -27,27 +33,53 @@ type Model struct {
 
 
 
-func (model *Model) CreateToken(userUuid uuid.UUID) *jwt.Token {
+func (model *Model) CreateToken(userUuid uuid.UUID) (*jwt.Token, error) {
+	thisTokenUuid := uuid.New()
+	refreshTokenUuid := uuid.New()
+
+	refreshBcrypt, err := bcrypt.GenerateFromPassword(refreshTokenUuid[:], bcrypt.DefaultCost)
+	if err != nil {
+		return nil, errors.New("failed to create a bcrypt hash: " + err.Error())
+	}
+	refreshBcryptBase64 := base64.StdEncoding.EncodeToString(refreshBcrypt)
+
+	// Add refresh token
+	err = model.Database.Add_RefreshToken(
+		db_io.RefreshToken{
+			JwtTokenUuid: thisTokenUuid,
+			RefreshBcryptHash: refreshBcrypt,
+		},
+	)
+	if err != nil {
+		return nil, errors.New("failed to create a refresh token: " + err.Error())
+	}
+	
+	// Generate JWT token
 	claims := Claims {
 		UserUuid: userUuid,
 		UserName: model.GenerateNameFromUuid(userUuid),
+		RefreshToken: refreshBcryptBase64,
 
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
+			ID: thisTokenUuid.String(),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
 
-	return token
+	return token, nil
 }
 
 func (model *Model) CreateTokenString(userUuid uuid.UUID) (string, error) {
-	token := model.CreateToken(userUuid)
-	ss, err := token.SignedString(model.Secret[:])
+	token, err := model.CreateToken(userUuid)
+	if err != nil {
+		return "", err
+	}
 
+	ss, err := token.SignedString(model.Secret[:])
 	if err != nil {
 		return "", err
 	}
