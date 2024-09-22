@@ -28,7 +28,8 @@
                     <label for="requestBody">Request Body (JSON):</label>
 <textarea id="authorize-requestBody" class="form-control" rows="4" required>
 {
-    "user_uuid": "your_uuid_here"
+    "user_uuid": "your_uuid_here",
+    "user_email": "your@email.here"
 }
 </textarea>
                 </div>
@@ -91,7 +92,8 @@
 <textarea id="refresh-requestBody" class="form-control" rows="4" required>
 {
     "access_token": "token_here",
-    "refresh_token": "token_here"
+    "refresh_token": "token_here",
+    "emulate_ip": ""
 }
 </textarea>
                 </div>
