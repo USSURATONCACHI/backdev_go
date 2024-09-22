@@ -2,6 +2,7 @@ package model
 
 import (
 	"backdev_go/db_io"
+	"encoding/base64"
 	"errors"
 	"fmt"
 
@@ -34,13 +35,26 @@ func (model *Model) refresh_CheckDatabaseForEntry(tokenUuid uuid.UUID, refreshTo
 	}
 	return refreshTokenEntry, nil, nil
 }
+func (model *Model) refresh_ProcessIpMismatch(oldIp string, newIp string) (error, error) {
+	fmt.Println("User IP changed, sending EMail warning")
+	return nil, nil
+}
 
 // Returns (Success result, Client error, Server error)
-func (model *Model) RefreshToken(tokenString string, refreshToken uuid.UUID, userIp string) (*JwtAndRefreshTokens, error, error) {
+func (model *Model) RefreshToken(tokenString string, refreshTokenBase64 string, userIp string) (*JwtAndRefreshTokens, error, error) {
+	// Check token validity
 	clientError, serverError := model.refresh_CheckTokenValid(tokenString)
 	if clientError != nil {
 		return nil, clientError, serverError
 	}
+
+	// Convert refresh token Base64 -> UUID
+	refreshTokenBytes, clientError := base64.StdEncoding.DecodeString(refreshTokenBase64)
+	if clientError != nil || len(refreshTokenBytes) != 16 {
+		return nil, errors.New("incorrect refresh token"), serverError
+	}
+	var refreshToken uuid.UUID
+	copy(refreshToken[:], refreshTokenBytes)
 
 	// Parse token claims
 	var claims Claims
@@ -49,16 +63,18 @@ func (model *Model) RefreshToken(tokenString string, refreshToken uuid.UUID, use
 		return nil, nil, errors.New("failed to parse already verified token")
 	}
 
-	// Check IP mismatch
-	if claims.UserIp != userIp {
-		fmt.Println("User IP changed, sending EMail warning")
-		// panic("Not implemented yet")
-	}
-
 	// Check DB for that token
 	_, clientError, serverError = model.refresh_CheckDatabaseForEntry(claims.TokenUuid, refreshToken)
 	if clientError != nil || serverError != nil {
 		return nil, clientError, serverError
+	}
+
+	// Check IP mismatch
+	if claims.UserIp != userIp {
+		clientError, serverError = model.refresh_ProcessIpMismatch(claims.UserIp, userIp)
+		if clientError != nil || serverError != nil {
+			return nil, clientError, serverError
+		}
 	}
 
 	// Delete used token

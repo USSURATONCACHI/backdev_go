@@ -24,5 +24,5 @@ type Model struct {
 
 type JwtAndRefreshTokens struct {
 	JwtToken string
-	RefreshToken uuid.UUID
+	RefreshTokenBase64 string
 }

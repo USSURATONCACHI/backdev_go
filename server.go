@@ -77,7 +77,7 @@ func ServerAuthorize(c *gin.Context, mdl model.Model) {
 
 	response := AuthorizeResponse {
 		AccessToken: tokens.JwtToken,
-		RefreshToken: tokens.RefreshToken.String(),
+		RefreshToken: tokens.RefreshTokenBase64,
 	}
 
 	c.IndentedJSON(http.StatusOK, response)
@@ -128,18 +128,12 @@ func ServerRefresh(c *gin.Context, mdl model.Model) {
 		return
 	}
 
-	refreshTokenUuid, err := uuid.Parse(request.RefreshToken)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, ErrorJson { Error: err.Error() })
-		return
-	}
-
 	ip := c.ClientIP()
 	if len(request.EmulateIp) > 0 {
 		ip = request.EmulateIp
 	}
 
-	tokens, clientErr, serverErr := mdl.RefreshToken(request.AccessToken, refreshTokenUuid, ip)
+	tokens, clientErr, serverErr := mdl.RefreshToken(request.AccessToken, request.RefreshToken, ip)
 
 	if clientErr != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, ErrorJson { Error: clientErr.Error() })
@@ -152,7 +146,7 @@ func ServerRefresh(c *gin.Context, mdl model.Model) {
 
 	response := RefreshResponse {
 		AccessToken: tokens.JwtToken,
-		RefreshToken: tokens.RefreshToken.String(),
+		RefreshToken: tokens.RefreshTokenBase64,
 	}
 
 	c.IndentedJSON(http.StatusOK, response)

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/base64"
 	"errors"
 	"time"
 
@@ -65,7 +66,7 @@ func (model *Model) CreateToken(userUuid uuid.UUID, userIp string) (*JwtAndRefre
 	// Return it
 	result := JwtAndRefreshTokens {
 		JwtToken: jwtToken,
-		RefreshToken: refreshTokenUuid,
+		RefreshTokenBase64: base64.StdEncoding.EncodeToString(refreshTokenUuid[:]),
 	}
 	return &result, nil
 }
