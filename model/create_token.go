@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/base64"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -12,12 +13,19 @@ import (
 	"backdev_go/db_io"
 )
 
-func (model *Model) createRawSignedJwtToken(tokenUuid uuid.UUID, userUuid uuid.UUID, userIp string) (string, error) {
+type RawTokeninfo struct {
+	UserUuid uuid.UUID
+	UserIp string
+	UserEmail string
+}
+
+func (model *Model) createRawSignedJwtToken(tokenUuid uuid.UUID, info RawTokeninfo) (string, error) {
 	claims := Claims {
-		UserUuid:  userUuid,
-		UserName:  model.Syllables.HumanNameFromUuid(userUuid),
-		UserIp:    userIp,
+		UserUuid:  info.UserUuid,
+		UserName:  model.Syllables.HumanNameFromUuid(info.UserUuid),
+		UserIp:    info.UserIp,
 		TokenUuid: tokenUuid,
+		UserEmail: info.UserEmail,
 
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Minute)),
@@ -36,14 +44,21 @@ func (model *Model) createRawSignedJwtToken(tokenUuid uuid.UUID, userUuid uuid.U
 	return ss, nil
 }
 
-// Returns: (Success Result, Server error)
-func (model *Model) CreateToken(userUuid uuid.UUID, userIp string) (*JwtAndRefreshTokens, error) {
+// Returns: (Success Result, Client error, Server error)
+func (model *Model) CreateToken(info RawTokeninfo) (*JwtAndRefreshTokens, error, error) {
+	// Check validity of data
+	err := model.create_CheckTokenValidity(info)
+	if err != nil {
+		return nil, err, nil
+	}
+
+	// Generate UUID pair
 	thisTokenUuid := uuid.New()
 	refreshTokenUuid := uuid.New()
 
 	refreshBcrypt, err := bcrypt.GenerateFromPassword(refreshTokenUuid[:], bcrypt.DefaultCost)
 	if err != nil {
-		return nil, errors.New("failed to create a bcrypt hash: " + err.Error())
+		return nil, nil, errors.New("failed to create a bcrypt hash: " + err.Error())
 	}
 
 	// Add refresh token
@@ -54,13 +69,13 @@ func (model *Model) CreateToken(userUuid uuid.UUID, userIp string) (*JwtAndRefre
 		},
 	)
 	if err != nil {
-		return nil, errors.New("failed to create a refresh token: " + err.Error())
+		return nil, nil, errors.New("failed to create a refresh token: " + err.Error())
 	}
 	
 	// Generate JWT token
-	jwtToken, err := model.createRawSignedJwtToken(thisTokenUuid, userUuid, userIp)
+	jwtToken, err := model.createRawSignedJwtToken(thisTokenUuid, info)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Return it
@@ -68,5 +83,27 @@ func (model *Model) CreateToken(userUuid uuid.UUID, userIp string) (*JwtAndRefre
 		JwtToken: jwtToken,
 		RefreshTokenBase64: base64.StdEncoding.EncodeToString(refreshTokenUuid[:]),
 	}
-	return &result, nil
+	return &result, nil, nil
+}
+
+func (model *Model) create_CheckTokenValidity(info RawTokeninfo) error {
+	if len(info.UserEmail) == 0 {
+		return errors.New("email must be specified")
+	}
+	if len(info.UserIp) == 0 {
+		return errors.New("IP must be specified")
+	}
+
+	if strings.Contains(info.UserEmail, "\n") {
+		return errors.New("email cannot have newlines")
+	}
+	if strings.Contains(info.UserEmail, " ") || strings.Contains(info.UserEmail, "\t") {
+		return errors.New("do not use whitespaces in email addresses")
+	}
+
+	if strings.Contains(info.UserIp, "\n") {
+		return errors.New("IP cannot have newlines")
+	}
+
+	return nil
 }

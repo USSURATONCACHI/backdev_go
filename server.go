@@ -48,6 +48,7 @@ func (server Server) Run(ip string) {
 
 type AuthorizeRequest struct {
 	UserUuid uuid.UUID `json:"user_uuid"`
+	UserEmail string `json:"user_email"`
 }
 type AuthorizeResponse struct {
 	AccessToken string `json:"access_token"`
@@ -67,11 +68,18 @@ func ServerAuthorize(c *gin.Context, mdl model.Model) {
 		return
 	}
 	
-	tokens, err := mdl.CreateToken(request.UserUuid, c.ClientIP())
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, ErrorJson {
-			Error: err.Error(),
-		})
+	tokenInfo := model.RawTokeninfo {
+		UserIp: c.ClientIP(),
+		UserUuid: request.UserUuid,
+		UserEmail: request.UserEmail,
+	}
+	tokens, clientError, serverError := mdl.CreateToken(tokenInfo)
+	if clientError != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, ErrorJson { Error: clientError.Error() })
+		return
+	}
+	if serverError != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, ErrorJson { Error: serverError.Error() })
 		return
 	}
 

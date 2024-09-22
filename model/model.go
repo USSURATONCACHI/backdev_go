@@ -13,6 +13,7 @@ type Claims struct {
 	UserName  string    `json:"user_name"`
 	UserIp    string    `json:"user_ip"`
 	TokenUuid uuid.UUID `json:"token_uuid"`
+	UserEmail string    `json:"user_email"`
 
 	jwt.RegisteredClaims
 }
