@@ -33,6 +33,7 @@ type Smtp struct {
 type App struct {
 	Secret string
 	DbType string
+	ListenIp string
 
 	Syllables Syllables
 	Postgresql Database

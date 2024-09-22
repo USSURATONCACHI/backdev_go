@@ -38,7 +38,8 @@ func main() {
 
 	// Run server
 	server := CreateServer(mdl)
-	server.Run("localhost:8080")
+	fmt.Printf("Running on IP '%s'\n", config.ListenIp)
+	server.Run(config.ListenIp)
 }
 
 
