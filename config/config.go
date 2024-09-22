@@ -28,7 +28,6 @@ type Smtp struct {
 	Password string
 
 	FromEmail string
-	MockUserEmail string
 }
 
 type App struct {

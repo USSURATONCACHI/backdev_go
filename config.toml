@@ -1,12 +1,14 @@
 secret = "MyAllBase" # Any string. Is will be SHA512-hashed into 64-byte secret for JWT.
 dbType = "postgresql" # Allowed: in_memory, postgresql
 
+
 [postgresql]
 host = "localhost"
 port = 5432
 user = "postgres"
 password = "postgres"
 dbName = "backdev"
+
 
 [smtp]
 host = "smtp.mail.ru"
@@ -15,7 +17,6 @@ fromEmail = "backdev_go@mail.ru"
 user = "backdev_go"
 password = "8cNwyVVqu6penpWY8ktJ"
 
-mockUserEmail = "redchindaniil+backdev@gmail.com"
 
 # Used for user name generation only
 [syllables]

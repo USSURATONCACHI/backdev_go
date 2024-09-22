@@ -11,6 +11,7 @@ import (
 	"backdev_go/config"
 	"backdev_go/db_io"
 	"backdev_go/model"
+	"backdev_go/smtp_io"
 )
 
 
@@ -40,40 +41,26 @@ func main() {
 	server.Run("localhost:8080")
 }
 
-func modelSmtpInfoFromConfig(Smtp config.Smtp) model.SmtpInfo {
-	return model.SmtpInfo{
-		Host: Smtp.Host,
-		Port: Smtp.Port,
-		User: Smtp.User,
-
-		Password:  Smtp.Password,
-		FromEmail: Smtp.FromEmail,
-
-		MockUserEmail: Smtp.MockUserEmail,
-	}
-}
-
-func modelSyllablesFromConfig(Syllables config.Syllables) model.Syllables {
-	return model.Syllables{
-		Start: Syllables.Start,
-		Middle: Syllables.Middle,
-		Final: Syllables.Final,
-	}
-}
 
 func ModelFromConfig(config config.App) (model.Model, func(), error) {
 	// Convert base info to model
 	mdl := model.Model {
 		Secret: sha512.Sum512([]byte(config.Secret)),
 		Syllables: modelSyllablesFromConfig(config.Syllables),
-		SmtpInfo: modelSmtpInfoFromConfig(config.Smtp),
+		SmtpClient: smtpClientFromConfig(config.Smtp),
 	}
-	deferFunc := func() {}
+	
+	db, deferFunc, error := databaseFromConfig(config)
+	mdl.Database = db
 
-	// Choose database type
+	return mdl, deferFunc, error
+}
+
+func databaseFromConfig(config config.App) (db_io.Database, func(), error) {
 	if config.DbType == "in_memory" {
 		// IN-MEMORY DATABASE
-		mdl.Database = db_io.InMemoryDatabaseNew()
+		return db_io.InMemoryDatabaseNew(), func(){}, nil;
+
 	} else if config.DbType == "postgresql" {
 		// POSTGRESQL DATABASE
 		requests := db_io.PostgresqlRequestsDefault()
@@ -87,14 +74,33 @@ func ModelFromConfig(config config.App) (model.Model, func(), error) {
 
 		db, err := db_io.PostgresqlDatabaseNew(options, requests)
 		if err != nil {
-			return mdl, deferFunc, err
+			return nil, func(){}, err
 		}
-		deferFunc = func() { db.Close() }
-		mdl.Database = db
+		deferFunc := func() { db.Close() }
+		
+		return db, deferFunc, nil
+
 	} else {
 		// INVALID DATABASE
-		return mdl, deferFunc, errors.New("unknown database type. Only supported are: 'in_memory', 'postgresql'")
+		return nil, func(){}, errors.New("unknown database type. Only supported are: 'in_memory', 'postgresql'")
 	}
+}
 
-	return mdl, deferFunc, nil
+func smtpClientFromConfig(Smtp config.Smtp) smtp_io.SmtpClient {
+	return &smtp_io.PlainAuthClient {
+		Host: Smtp.Host,
+		Port: Smtp.Port,
+		User: Smtp.User,
+
+		Password:  Smtp.Password,
+		FromEmail: Smtp.FromEmail,
+	}
+}
+
+func modelSyllablesFromConfig(Syllables config.Syllables) model.Syllables {
+	return model.Syllables{
+		Start: Syllables.Start,
+		Middle: Syllables.Middle,
+		Final: Syllables.Final,
+	}
 }

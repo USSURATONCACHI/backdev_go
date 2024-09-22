@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 
 	"backdev_go/db_io"
+	"backdev_go/smtp_io"
 )
 
 type Claims struct {
@@ -19,8 +20,8 @@ type Claims struct {
 type Model struct {
 	Secret [64]byte
 	Database db_io.Database
+	SmtpClient smtp_io.SmtpClient
 	Syllables Syllables
-	SmtpInfo SmtpInfo
 }
 
 type JwtAndRefreshTokens struct {

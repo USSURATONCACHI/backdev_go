@@ -30,7 +30,7 @@ type DatabaseParams struct {
 }
 
 type Database interface {
-	Get_RefreshToken(jwtTokenUuid uuid.UUID) (*RefreshToken, error);
-	Remove_RefreshToken(jwtTokenUuid uuid.UUID) error;
-	Add_RefreshToken(token RefreshToken) error;
+	Get_RefreshToken(jwtTokenUuid uuid.UUID) (*RefreshToken, error)
+	Remove_RefreshToken(jwtTokenUuid uuid.UUID) error
+	Add_RefreshToken(token RefreshToken) error
 }

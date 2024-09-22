@@ -1,21 +1,21 @@
-package model
+package smtp_io
 
 import (
 	"fmt"
 	"net/smtp"
 )
 
-type SmtpInfo struct {
+type PlainAuthClient struct {
 	Host string
 	Port int16
 	User string
 	Password string
 
 	FromEmail string
-	MockUserEmail string
 }
 
-func (info *SmtpInfo) SendPlainAuth(subject string, body string, toEmail string) error {
+
+func (info *PlainAuthClient) SendPlainAuth(subject string, body string, toEmail string) error {
 	auth := smtp.PlainAuth("", info.User, info.Password, info.Host)
 
 	addr := fmt.Sprintf("%s:%d", info.Host, info.Port)
@@ -30,4 +30,8 @@ func (info *SmtpInfo) SendPlainAuth(subject string, body string, toEmail string)
 	err := smtp.SendMail(addr, auth, info.FromEmail, []string { toEmail }, message)
 
 	return err
+}
+
+func (info *PlainAuthClient) SendEmail(subject string, body string, toEmail string) error {
+	return info.SendPlainAuth(subject, body, toEmail)
 }
