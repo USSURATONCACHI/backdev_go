@@ -1,4 +1,4 @@
-secret = "MyAllBase" # Any string. Is will be SHA512-hashed into 64-byte secret for JWT.
+secret = "MyAllBase"  # Any string. Is will be SHA512-hashed into 64-byte secret for JWT.
 dbType = "postgresql" # Allowed: in_memory, postgresql
 listenIp = "localhost:8080"
 
@@ -14,9 +14,9 @@ dbName = "backdev"
 [smtp]
 host = "smtp.gmail.com"
 port = 587
-fromEmail = "<EMAIL>"
-user = "<EMAIL>"
-password = "<APP PASSWORD>"
+# fromEmail = "<EMAIL>"
+# user = "<EMAIL>"
+# password = "<APP PASSWORD>"
 
 
 # Used for user name generation only
