@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -49,9 +50,10 @@ func GetConfigFromCli() (App, error) {
 		return App{}, errors.New("wrong amount of CLI arguments passed (must be 1)")
 	}
 	filePath := os.Args[1]
+	fmt.Printf("Config filepath: '%s'\n", filePath)
 	
 	// Open the file
-	fsys := os.DirFS(".")
+	fsys := os.DirFS("./")
 	file, err := fsys.Open(filePath)
 	if err != nil {
 		return App{}, errors.New("error opening config file: " + err.Error())
@@ -104,7 +106,7 @@ func UpdateConfigFromEnv(conf *App) {
 	if val, is_set := os.LookupEnv("BACKDEV_PSQL_PASSWORD"); is_set {
 		conf.Postgresql.Password = val
 	}
-	if val, is_set := os.LookupEnv("BACKDEV_PSQL_DBNAME"); is_set {
+	if val, is_set := os.LookupEnv("BACKDEV_PSQL_DB_NAME"); is_set {
 		conf.Postgresql.DbName = val
 	}
 

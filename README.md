@@ -6,7 +6,56 @@ backdev_go - это пример RESTful HTTP API сервиса для ауте
 
 ## Запуск
 
-### Собрать программу и запустить
+### docker-compose
+
+```yml
+version: '3.8'
+
+services:
+  backdev:
+    image: ussuratoncachi/backdev_go:0.2
+    container_name: backdev_go
+    ports:
+      - "9000:9000"
+    depends_on:
+      - postgres
+    environment:
+      - BACKDEV_SECRET=My Very Precious Secret Phrase
+      - BACKDEV_DB_TYPE=postgresql
+      - BACKDEV_LISTEN_IP=0.0.0.0:9000
+
+      - BACKDEV_PSQL_HOST=postgres
+      - BACKDEV_PSQL_PORT=5432
+      - BACKDEV_PSQL_USER=admin
+      - BACKDEV_PSQL_PASSWORD=admin
+      - BACKDEV_PSQL_DB_NAME=backdev_db
+
+      #- BACKDEV_SMTP_HOST=smtp.gmail.com
+      #- BACKDEV_SMTP_PORT=587
+      - BACKDEV_SMTP_USER=<Your SMTP Email>
+      - BACKDEV_SMTP_FROM_EMAIL=<Your SMTP Email>
+      - BACKDEV_SMTP_PASSWORD=<Your SMTP password>
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: backdev_db
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+```
+
+### Альтернативно: вручную собрать программу и запустить
 
 ```bash
 $ go build .
