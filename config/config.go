@@ -1,9 +1,11 @@
 package config
 
 import (
-	"os"
-	"io"
 	"errors"
+	"io"
+	"os"
+	"strconv"
+
 	"github.com/BurntSushi/toml"
 )
 
@@ -69,5 +71,61 @@ func GetConfigFromCli() (App, error) {
 		return App{}, errors.New("error parsing config file: " + err.Error())
 	}
 
+	UpdateConfigFromEnv(&conf)
+
 	return conf, nil
+}
+
+func UpdateConfigFromEnv(conf *App) {
+	if val, is_set := os.LookupEnv("BACKDEV_SECRET"); is_set {
+		conf.Secret = val
+	}
+	if val, is_set := os.LookupEnv("BACKDEV_DB_TYPE"); is_set {
+		conf.DbType = val
+	}
+	if val, is_set := os.LookupEnv("BACKDEV_LISTEN_IP"); is_set {
+		conf.ListenIp = val
+	}
+
+	// PSQL
+	if val, is_set := os.LookupEnv("BACKDEV_PSQL_HOST"); is_set {
+		conf.Postgresql.Host = val
+	}
+	if val, is_set := os.LookupEnv("BACKDEV_PSQL_PORT"); is_set {
+		parsed, err := strconv.ParseInt(val, 10, 16)
+		if err != nil {
+			panic("Failed to parse BACKDEV_PSQL_PORT to an int16")
+		}
+		conf.Postgresql.Port = int16(parsed)
+	}
+	if val, is_set := os.LookupEnv("BACKDEV_PSQL_USER"); is_set {
+		conf.Postgresql.User = val
+	}
+	if val, is_set := os.LookupEnv("BACKDEV_PSQL_PASSWORD"); is_set {
+		conf.Postgresql.Password = val
+	}
+	if val, is_set := os.LookupEnv("BACKDEV_PSQL_DBNAME"); is_set {
+		conf.Postgresql.DbName = val
+	}
+
+	// SMTP
+	if val, is_set := os.LookupEnv("BACKDEV_SMTP_HOST"); is_set {
+		conf.Smtp.Host = val
+	}
+	if val, is_set := os.LookupEnv("BACKDEV_SMTP_PORT"); is_set {
+		parsed, err := strconv.ParseInt(val, 10, 16)
+		if err != nil {
+			panic("Failed to parse BACKDEV_SMTP_PORT to an int16")
+		}
+		conf.Smtp.Port = int16(parsed)
+	}
+	if val, is_set := os.LookupEnv("BACKDEV_SMTP_USER"); is_set {
+		conf.Smtp.User = val
+	}
+	if val, is_set := os.LookupEnv("BACKDEV_SMTP_PASSWORD"); is_set {
+		conf.Smtp.Password = val
+	}
+	if val, is_set := os.LookupEnv("BACKDEV_SMTP_FROM_EMAIL"); is_set {
+		conf.Smtp.FromEmail = val
+	}
 }

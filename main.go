@@ -24,6 +24,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Printf("SMTP host - %s:%d\n\t (user = '%s', password = ...)\n", config.Smtp.Host, config.Smtp.Port, config.Smtp.User)
+	fmt.Printf("PSQL host - %s:%d\n\t (user = '%s', password = ...)\n", config.Postgresql.Host, config.Postgresql.Port, config.Postgresql.User)
+
 	// Create model
 	mdl, deferFunc, err := ModelFromConfig(config)
 	if err != nil {
@@ -33,7 +36,7 @@ func main() {
 	}
 	defer deferFunc()
 
-	fmt.Println("Your base64 of secret: ", base64.StdEncoding.EncodeToString(mdl.Secret[:]))
+	fmt.Println("Base64 of Secret - ", base64.StdEncoding.EncodeToString(mdl.Secret[:]))
 	
 
 	// Run server
