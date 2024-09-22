@@ -15,11 +15,11 @@ type Server struct {
 }
 
 func CreateServer(mdl model.Model) Server {
+	gin.SetMode(gin.ReleaseMode)
 	server := Server {
 		Model: mdl,
 		GinEngine: gin.Default(),
 	}
-
 
 	server.GinEngine.POST(
 		"/authorize", 
