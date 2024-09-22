@@ -35,6 +35,7 @@ services:
       - BACKDEV_SMTP_USER=<Your SMTP Email>
       - BACKDEV_SMTP_FROM_EMAIL=<Your SMTP Email>
       - BACKDEV_SMTP_PASSWORD=<Your SMTP password>
+    restart: always
     networks:
       - app-network
 
