@@ -26,9 +26,8 @@ func (info *PlainAuthClient) SendPlainAuth(subject string, body string, toEmail 
 			"\r\n" +
 			"%s")
 
-	message := []byte(fmt.Sprintf(format, info.FromEmail, toEmail, subject, body))
-	err := smtp.SendMail(addr, auth, info.FromEmail, []string { toEmail }, message)
-
+	message := fmt.Sprintf(format, info.FromEmail, toEmail, subject, body)
+	err := smtp.SendMail(addr, auth, info.FromEmail, []string { toEmail }, []byte(message))
 	return err
 }
 

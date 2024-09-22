@@ -11,11 +11,11 @@ dbName = "backdev"
 
 
 [smtp]
-host = "smtp.mail.ru"
-port = 465
-fromEmail = "backdev_go@mail.ru"
-user = "backdev_go"
-password = "8cNwyVVqu6penpWY8ktJ"
+host = "smtp.gmail.com"
+port = 587
+fromEmail = "<EMAIL>"
+user = "<EMAIL>"
+password = "<APP PASSWORD>"
 
 
 # Used for user name generation only
