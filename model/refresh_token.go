@@ -28,10 +28,7 @@ func (model *Model) RefreshToken(tokenString string, refreshTokenBase64 string, 
 
 	// Check IP mismatch
 	if claims.UserIp != userIp {
-		clientError, serverError = model.refresh_ProcessIpMismatch(claims.UserIp, userIp, claims.UserName, claims.UserEmail)
-		if clientError != nil || serverError != nil {
-			return nil, clientError, serverError
-		}
+		go model.refresh_ProcessIpMismatch(claims.UserIp, userIp, claims.UserName, claims.UserEmail)
 	}
 
 	// Delete used token
@@ -126,7 +123,7 @@ func (model *Model) refresh_CheckDatabaseForEntry(tokenUuid uuid.UUID, refreshTo
 	return refreshTokenEntry, nil, nil
 }
 
-func (model *Model) refresh_ProcessIpMismatch(oldIp string, newIp string, userName string, email string) (error, error) {
+func (model *Model) refresh_ProcessIpMismatch(oldIp string, newIp string, userName string, email string) {
 	fmt.Println("User IP changed, sending EMail warning")
 	
 	subject := "Backdev: You just changed your ip inside of session"
@@ -137,8 +134,6 @@ func (model *Model) refresh_ProcessIpMismatch(oldIp string, newIp string, userNa
 	if err != nil {
 		fmt.Println("SMTP sending error: ", err)
 	}
-
-	return nil, nil
 }
 // ======
 // =
