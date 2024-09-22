@@ -40,20 +40,42 @@ func main() {
 	server.Run("localhost:8080")
 }
 
+func modelSmtpInfoFromConfig(Smtp config.Smtp) model.SmtpInfo {
+	return model.SmtpInfo{
+		Host: Smtp.Host,
+		Port: Smtp.Port,
+		User: Smtp.User,
+
+		Password:  Smtp.Password,
+		FromEmail: Smtp.FromEmail,
+
+		MockUserEmail: Smtp.MockUserEmail,
+	}
+}
+
+func modelSyllablesFromConfig(Syllables config.Syllables) model.Syllables {
+	return model.Syllables{
+		Start: Syllables.Start,
+		Middle: Syllables.Middle,
+		Final: Syllables.Final,
+	}
+}
+
 func ModelFromConfig(config config.App) (model.Model, func(), error) {
+	// Convert base info to model
 	mdl := model.Model {
 		Secret: sha512.Sum512([]byte(config.Secret)),
-		Syllables: model.Syllables {
-			Start: config.Syllables.Start,
-			Middle: config.Syllables.Middle,
-			Final: config.Syllables.Final,
-		},
+		Syllables: modelSyllablesFromConfig(config.Syllables),
+		SmtpInfo: modelSmtpInfoFromConfig(config.Smtp),
 	}
 	deferFunc := func() {}
 
+	// Choose database type
 	if config.DbType == "in_memory" {
+		// IN-MEMORY DATABASE
 		mdl.Database = db_io.InMemoryDatabaseNew()
 	} else if config.DbType == "postgresql" {
+		// POSTGRESQL DATABASE
 		requests := db_io.PostgresqlRequestsDefault()
 		options := db_io.DatabaseParams {
 			Host: config.Postgresql.Host,
@@ -70,6 +92,7 @@ func ModelFromConfig(config config.App) (model.Model, func(), error) {
 		deferFunc = func() { db.Close() }
 		mdl.Database = db
 	} else {
+		// INVALID DATABASE
 		return mdl, deferFunc, errors.New("unknown database type. Only supported are: 'in_memory', 'postgresql'")
 	}
 

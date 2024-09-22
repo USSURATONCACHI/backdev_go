@@ -20,6 +20,7 @@ type Model struct {
 	Secret [64]byte
 	Database db_io.Database
 	Syllables Syllables
+	SmtpInfo SmtpInfo
 }
 
 type JwtAndRefreshTokens struct {
