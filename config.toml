@@ -9,8 +9,8 @@ password = "postgres"
 dbName = "backdev"
 
 [smtp]
-addr = "smtp.mail.ru:465"
 host = "smtp.mail.ru"
+port = 465
 fromEmail = "backdev_go@mail.ru"
 user = "backdev_go"
 password = "8cNwyVVqu6penpWY8ktJ"

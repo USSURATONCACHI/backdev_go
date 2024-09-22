@@ -21,12 +21,24 @@ type Database struct {
 	DbName string
 }
 
+type Smtp struct {
+	Host string
+	Port int16
+	User string
+	Password string
+
+	FromEmail string
+	MockUserEmail string
+}
+
 type App struct {
 	Secret string
 	DbType string
 
 	Syllables Syllables
 	Postgresql Database
+	
+	Smtp Smtp
 }
 
 func GetConfigFromCli() (App, error) {
